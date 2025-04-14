@@ -7,7 +7,7 @@ Generative Algorithm with Python to search the best chromosome (x1,x2)
 To use this project you must install docker first on your machine, after installed type this on terminal
 
 ```bash
-docker compose up --build
+docker start -ai python-ga-app-1
 ```
 
 ## Contributing
