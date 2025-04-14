@@ -46,7 +46,7 @@
                 (push offspring2 new-population))))
           (setf population (nreverse new-population)))))
     (multiple-value-bind (x1 x2) (decode-chromosome best-chromosome)
-      (values best-chromosome x1 x2)))
+      (values best-chromosome x1 x2))))
 
 ;; Example usage
 (multiple-value-bind (best-chromosome x1 x2) (generative-algorithm 100 1000)
