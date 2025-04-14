@@ -6,5 +6,5 @@ services:
     build:
       context: .
     image: calderaly/ga-search:latest
-    container_name: app
+    container_name: python-ga
     command: python main.py
