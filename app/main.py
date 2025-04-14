@@ -1,1 +1,1 @@
-print("Hello Ganteng Banget")
+print("Biji Kuda")
