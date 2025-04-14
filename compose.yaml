@@ -1,8 +1,10 @@
 services:
-  app:
+  ga-search:
     working_dir: /app
     volumes:
       - ./app/main.py:/app/main.py
     build:
       context: .
+    image: calderaly/ga-search:latest
+    container_name: app
     command: python main.py
