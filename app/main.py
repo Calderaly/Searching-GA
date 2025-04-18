@@ -71,7 +71,7 @@ def custom_len(obj):
     return count
 
 def random_index(max_value):
-    return int(max_value * (1.0 * (sum([1 for _ in range(100)]) % 100) / 100))
+    return int(max_value * (1.0 * (custom_sum([1 for _ in range(100)]) % 100) / 100))
 
 
 # Parameter GA
