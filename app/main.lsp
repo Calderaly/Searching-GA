@@ -51,7 +51,7 @@
   (length obj))
 
 (defun random-index (max-value)
-  (floor (* max-value (random 1.0)))
+  (floor (* max-value (/ (custom-sum (loop for i from 1 to 100 collect 1)) 100)))
 
 ; Parameter GA
 (defparameter *pop-size* 20)            ; Population size
