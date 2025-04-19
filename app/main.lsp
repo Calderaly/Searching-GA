@@ -1,156 +1,127 @@
 ; Using Steel Bank Common Lisp Compiler.
 ; Other Common Lisp compiler may have it's own implementation for codes below
 
-; Custom sum function
-(defun custom-sum (&rest args)
-  (reduce #'+ args))
+;; Constants
+(defparameter *bits* 10)  ;; Number of bits for binary representation
+(defparameter *domain-min* -10)
+(defparameter *domain-max* 10)
 
-; Custom Absolute Function
-(defun custom-abs (value)
-  (if (< value 0) 
-      (- value) 
-      value))
-
-; Custom max function
-(defun custom-max (&rest args)
-  (reduce #'max args))
-
-; Custom min function
-(defun custom-min (&rest args)
-  (reduce #'min args))
-
-(defun custom-sin (x)
-  (let ((term x)
-        (sum-sin x)
-        (n 1))
-    (loop
-      (setq term (* term (/ (- x x) (* (* 2 n) (+ (* 2 n) 1)))))
-      (setq sum-sin (+ sum-sin term))
-      (when (< (custom-abs term) 1e-10)  ; Precision threshold
-        (return))
-      (setq n (1+ n)))
-    sum-sin))
-
-(defun custom-cos (x)
-  (let ((term 1)
-        (sum-cos 1)
-        (n 1))
-    (loop
-      (setq term (* term (/ (- x x) (* (- (* 2 n) 1) (* 2 n)))))
-      (setq sum-cos (+ sum-cos term))
-      (when (< (custom-abs term) 1e-10)  ; Precision threshold
-        (return))
-      (setq n (1+ n)))
-    sum-cos))
-
-(defun custom-tan (x)
-  (/ (custom-sin x) (custom-cos x)))
-
-; Custom length function
-(defun custom-len (obj)
-  (length obj))
-
-(defun random-index (max-value)
-  (floor (* max-value (/ (custom-sum (loop for i from 1 to 100 collect 1)) 100)))
-
-; Parameter GA
-(defparameter *pop-size* 20)            ; Population size
-(defparameter *bits* 10)                 ; Number of bits per variable (x1 and x2)
-(defparameter *total-bits* (* 2 *bits*)) ; Total bits for one chromosome
-(defparameter *pc* 0.7)                  ; Crossover probability
-(defparameter *pm* 0.01)                 ; Mutation probability per bit
-(defparameter *generations* 100)         ; Number of iterations/generations
-
-; Function to convert binary representation to real value in the interval [lower, upper]
-(defun binary-to-real (bin-str &optional (lower -10) (upper 10))
-  (let ((nilai-int (parse-integer bin-str :radix 2))
-        (max-int (1- (expt 2 *bits*))))
+;; Function to convert binary representation to real value in the interval [lower, upper]
+(defun binary-to-real (bin-str &optional (lower *domain-min*) (upper *domain-max*))
+  (let* ((nilai-int (parse-integer bin-str :radix 2))  ;; Convert binary to integer
+         (max-int (1- (expt 2 *bits*))))  ;; Maximum possible value
     (+ lower (* (/ (- upper lower) max-int) nilai-int))))
 
-; Function to decode chromosome to get values x1 and x2
+;; Function to decode chromosome to get values x1 and x2
 (defun decode (chromosome)
-  (let ((x1-bin (subseq chromosome 0 *bits*))
-        (x2-bin (subseq chromosome *bits*)))
-    (values (binary-to-real x1-bin) (binary-to-real x2-bin))))
+  (let* ((x1-bin (subseq chromosome 0 *bits*))
+         (x2-bin (subseq chromosome *bits*))
+         (x1 (binary-to-real x1-bin))
+         (x2 (binary-to-real x2-bin)))
+    (values x1 x2)))
 
-; Objective function to minimize
+;; Function to encode numerical data types into binary
+(defun encode-to-binary (value)
+  (cond
+    ((integerp value) (format nil "~0,10b" value))
+    ((floatp value) (format nil "~0,10b" (truncate (* (/ (- value *domain-min*) (- *domain-max* *domain-min*)) (1- (expt 2 *bits*))))))
+    (t (error "Unsupported data type for encoding."))))
+
+;; Objective function to be minimized
 (defun objective (x1 x2)
-  (handler-case
-      (- (* (custom-sin x1) (custom-cos x2) (custom-tan (+ x1 x2)))
-         (* 3/4 (exp (- 1 (sqrt (* x1 x1))))))
-    (error () (float 'inf))))
+  (+ (expt x1 2) (expt x2 2)))
 
-; Fitness evaluation function
-(defun fitness (chromosome)
-  (multiple-value-bind (x1 x2) (decode chromosome)
-    (let ((f-value (objective x1 x2)))
-      (/ 1 (+ 1 (custom-abs f-value))))))
+;; Genetic algorithm parameters
+(defparameter *population-size* 20)       ;; Number of individuals in the population
+(defparameter *generations* 50)            ;; Number of generations
+(defparameter *tournament-size* 3)         ;; Number of individuals in tournament selection
+(defparameter *crossover-rate* 0.8)        ;; Probability of performing crossover
+(defparameter *mutation-rate* 0.1)         ;; Probability of mutation on each variable
 
-; Initialize population with random chromosomes
-(defun init-population ()
-  (let ((population '()))
-    (dotimes (_ *pop-size*)
-      (let ((chromosome (loop for i from 0 below *total-bits*
-                               collect (if (evenp i) "0" "1")))))
-        (push chromosome population)))
-    (nreverse population)))
+;; Function to generate a random individual
+(defun create-individual ()
+  (values (+ *domain-min* (random (- *domain-max* *domain-min*))
+          (+ *domain-min* (random (- *domain-max* *domain-min*))))))
 
-; Simple tournament selection for parents
-(defun selection (pop)
-  (let ((new-pop '()))
-    (dotimes (_ *pop-size*)
-      (let ((ind1 (nth (random-index (custom-len pop)) pop))
-            (ind2 (nth (random-index (custom-len pop)) pop)))
-        (push (if (> (fitness ind1) (fitness ind2)) ind1 ind2) new-pop)))
-    (nreverse new-pop)))
+;; Create initial population
+(defun create-population ()
+  (loop for i from 1 to *population-size*
+        collect (create-individual)))
 
-; Crossover process between two parents
+;; Evaluate fitness of each individual (the smaller the objective value, the better)
+(defun evaluate-population (population)
+  (loop for individual in population
+        collect (cl-tuples:make (list individual (apply 'objective individual)))))
+
+;; Selection: Tournament Selection
+(defun tournament-selection (evaluated-pop)
+  (let ((tournament (loop for individual in (loop repeat *tournament-size* collect (nth (random (length evaluated-pop)) evaluated-pop))
+                          collect individual)))
+    (reduce (lambda (a b) (if (< (second a) (second b)) a b)) tournament)))
+
+;; Crossover: Arithmetic Crossover
 (defun crossover (parent1 parent2)
-  (if (< (random-index 1) *pc*)
-      (let ((point (1+ (random-index (1- *total-bits*)))))
-        (values (concatenate 'string (subseq parent1 0 point) (subseq parent2 point))
-                (concatenate 'string (subseq parent2 0 point) (subseq parent1 point)))
-      (values parent1 parent2))))
+  (if (< (random 1.0) *crossover-rate*)
+      (let* ((parent1-bin (concatenate 'string (encode-to-binary (first parent1)) (encode-to-binary (second parent1))))
+             (parent2-bin (concatenate 'string (encode-to-binary (first parent2)) (encode-to-binary (second parent2))))
+             (crossover-point (1+ (random (length parent1-bin)))))
+        (multiple-value-bind (child1 child2) (values (decode (concatenate 'string (subseq parent1-bin 0 crossover-point) (subseq parent2-bin crossover-point)))
+                                                      (decode (concatenate 'string (subseq parent2-bin 0 crossover-point) (subseq parent1-bin crossover-point))))
+          (values child1 child2)))
+      (values parent1 parent2)))
 
-; Mutation process: each bit has a chance *pm* to flip
-(defun mutate (chromosome)
-  (map 'string (lambda (bit)
-                 (cond ((and (string= bit "0") (< (random-index 1) *pm*)) "1")
-                       ((and (string= bit "1") (< (random-index 1) *pm*)) "0")
-                       (t bit)))
-       chromosome))
+;; Mutation: Adding random disturbance to each variable
+(defun mutate (individual)
+  (multiple-value-bind (x1 x2) individual
+    (when (< (random 1.0) *mutation-rate*)
+      (setf x1 (min (max (+ x1 (random 2.0 -1.0)) *domain-min*) *domain-max*)))
+    (when (< (random 1.0) *mutation-rate*)
+      (setf x2 (min (max (+ x2 (random 2.0 -1.0)) *domain-min*) *domain-max*)))
+    (values x1 x2)))
 
-; Main genetic algorithm function
+;; Main Genetic Algorithm
 (defun genetic-algorithm ()
-  (let ((population (init-population))
-        (best-chromosome nil)
-        (best-value (float 'inf')))
-    (dotimes (gen *generations*)
-      (let ((pop-evaluated (mapcar (lambda (chrom) (list chrom (objective (decode chrom))))
-                                    population)))
-        (dolist (chrom pop-evaluated)
-          (let ((f-val (second chrom)))
-            (when (< f-val best-value)
-              (setq best-value f-val)
-              (setq best-chromosome (first chrom)))))
-        (let ((mating-pool (selection population))
-              (new-population '()))
-          (dotimes (i *pop-size* 2)
-            (let* ((parent1 (nth i mating-pool))
-                   (parent2 (if (< (1+ i) *pop-size*) (nth (1+ i) mating-pool) (first mating-pool)))
-                   (child1 (crossover parent1 parent2))
-                   (child2 (crossover parent1 parent2)))
-              (push (mutate child1) new-population)
-              (push (mutate child2) new-population)))
-          (setq population (subseq (nreverse new-population) 0 *pop-size*)))))
-    (multiple-value-bind (best-x1 best-x2) (decode best-chromosome)
-      (values best-chromosome best-x1 best-x2 best-value))))
+  (let ((population (create-population)))
+    (loop for generation from 1 to *generations*
+          do (let ((evaluated-pop (evaluate-population population))
+                   (new-population '()))
+               (loop while (< (length new-population) *population-size*)
+                     do (let* ((parent1 (tournament-selection evaluated-pop))
+                               (parent2 (tournament-selection evaluated-pop))
+                               (values (crossover parent1 parent2)))
+                          (multiple-value-bind (child1 child2) values
+                            (setf child1 (mutate child1))
+                            (setf child2 (mutate child2))
+                            (push child1 new-population)
+                            (when (< (length new-population) *population-size*)
+                              (push child2 new-population)))))
+               (setf population (nreverse new-population))
+               (multiple-value-bind (best-individual best-value) (reduce (lambda (a b) (if (< (second a) (second b)) a b)) evaluated-pop)
+                 (format t "Generation ~A: Best = ~A with value = ~A~%" generation best-individual best-value)
+                 (let* ((binary-representation-1 (encode-to-binary (first best-individual)))
+                        (binary-representation-2 (encode-to-binary (second best-individual)))
+                        (binary-representation-total (concatenate 'string binary-representation-1 binary-representation-2))
+                        (best-value-binary (encode-to-binary (truncate best-value))))
+                   (format t "Binary representation of first best individual ~A, second best individual ~A, and total best individual: ~A~%" binary-representation-1 binary-representation-2 binary-representation-total)
+                   (format t "Best value in binary: ~A~%" best-value-binary)))))
+    (multiple-value-bind (best-individual best-value) (reduce (lambda (a b) (if (< (second a) (second b)) a b)) (evaluate-population population))
+      (values best-individual best-value))))
 
-; Execute the program
+;; Running the genetic algorithm
 (defun main ()
-  (multiple-value-bind (best-chrom best-x1 best-x2 best-obj) (genetic-algorithm)
-    (format t "Best Chromosome: ~a~%" best-chrom)
-    (format t "Value x1 = ~a~%" best-x1)
-    (format t "Value x2 = ~a~%" best-x2)
-    (format t "Objective Value = ~a~%" best-obj)))
+  (multiple-value-bind (best-solution best-score) (genetic-algorithm)
+    (format t "~%Best solution found:~%x1 = ~A, x2 = ~A, with value = ~A~%"
+            (first best-solution) (second best-solution) best-score)
+    (let* ((best-solution-bin-1 (encode-to-binary (first best-solution)))
+           (best-solution-bin-2 (encode-to-binary (second best-solution)))
+           (best-solution-bin-total (concatenate 'string best-solution-bin-1 best-solution-bin-2))
+           (best-score-binary (encode-to-binary (truncate best-score))))
+      (format t "Binary representation of the best first solution ~A, the best second solution ~A, and total best solution ~A~%" best-solution-bin-1 best-solution-bin-2 best-solution-bin-total)
+      (format t "Binary representation of the best score: ~A~%" best-score-binary)
+      (format t "~%Comparison of binary numbers after crossover and mutation:~%")
+      (loop for individual in (create-population)
+            do (let* ((binary-representation-1 (encode-to-binary (first individual)))
+                      (binary-representation-2 (encode-to-binary (second individual)))
+                      (binary-representation-total (concatenate 'string binary-representation-1 binary-representation-2)))
+                 (format t "Individual: ~A, Binary1: ~A, Binary2: ~A, sum: ~A~%" individual binary-representation-1 binary-representation-2 binary-representation-total))))))
 (main)

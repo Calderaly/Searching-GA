@@ -1,89 +1,12 @@
-# Custom sum function
-def custom_sum(*args):
-    total = 0
-    for number in args:
-        total += number
-    return total
+import random
 
-# Custom Absolute Function
-def custom_abs(value):
-    # if value < 0:
-        # return -value
-    # return value
-    return -value if value < 0 else value
-
-# Custom max function
-def custom_max(*args):
-    if not args:
-        return None
-    max_value = args[0]
-    for value in args:
-        if value > max_value:
-            max_value = value
-    return max_value
-
-# Custom min function
-def custom_min(*args):
-    if not args:
-        # raise ValueError("custom_min() arg is an empty sequence")
-        return None
-    min_value = args[0]
-    for arg in args:
-        if arg < min_value:
-            min_value = arg
-    return min_value
-
-
-def custom_sin(x):
-    # Custom sine function using Taylor series expansion
-    term = x
-    sum_sin = x
-    n = 1
-    while True:
-        term *= -x * x / ((2 * n) * (2 * n + 1))
-        sum_sin += term
-        if custom_abs(term) < 1e-10:  # Precision threshold
-            break
-        n += 1
-    return sum_sin
-
-def custom_cos(x):
-    # Custom cosine function using Taylor series expansion
-    term = 1
-    sum_cos = 1
-    n = 1
-    while True:
-        term *= -x * x / ((2 * n - 1) * (2 * n))
-        sum_cos += term
-        if custom_abs(term) < 1e-10:  # Precision threshold
-            break
-        n += 1
-    return sum_cos
-
-def custom_tan(x):
-    return custom_sin(x) / custom_cos(x)
-
-# Custom length function
-def custom_len(obj):
-    count = 0
-    for _ in obj:
-        count += 1
-    return count
-
-def random_index(max_value):
-    return int(max_value * (1.0 * (custom_sum([1 for _ in range(100)]) % 100) / 100))
-
-
-# Parameter GA
-POP_SIZE = 20            # Population size
-BITS = 10                # Number of bits per variable (x1 and x2)
-TOTAL_BITS = 2 * BITS    # Total bits for one chromosome
-PC = 0.7                 # Crossover probability
-PM = 0.01                # Mutation probability per bit
-GENERATIONS = 100        # Number of iterations/generations
+# Constants
+BITS = 10  # Number of bits for binary representation
+DOMAIN_MIN = -10
+DOMAIN_MAX = 10
 
 # Function to convert binary representation to real value in the interval [lower, upper]
-def binary_to_real(bin_str, lower=-10, upper=10):
+def binary_to_real(bin_str, lower=DOMAIN_MIN, upper=DOMAIN_MAX):
     nilai_int = int(bin_str, 2)  # Convert binary to integer
     max_int = 2**BITS - 1         # Maximum possible value
     return lower + (upper - lower) * nilai_int / max_int
@@ -96,78 +19,126 @@ def decode(chromosome):
     x2 = binary_to_real(x2_bin)
     return x1, x2
 
-# Objective function to minimize
+# Function to encode numerical data types into binary
+def encode_to_binary(value):
+    if isinstance(value, int):
+        return format(value, f'0{BITS}b')
+    elif isinstance(value, float):
+        return format(int((value - DOMAIN_MIN) / (DOMAIN_MAX - DOMAIN_MIN) * (2**BITS - 1)), f'0{BITS}b')
+    else:
+        raise ValueError("Unsupported data type for encoding.")
+
+# Objective function to be minimized
 def objective(x1, x2):
-    try:
-        return - (sin(x1) * cos(x2) * tan(x1 + x2) + (3/4) * exp(1 - sqrt(x1**2)))
-    except Exception:
-        return float('inf')
+    return x1**2 + x2**2
 
-# Fitness evaluation function
-def fitness(chromosome):
-    x1, x2 = decode(chromosome)
-    f_value = objective(x1, x2)
-    return 1 / (1 + custom_abs(f_value))
+# Genetic algorithm parameters
+POPULATION_SIZE = 20       # Number of individuals in the population
+GENERATIONS = 50           # Number of generations
+TOURNAMENT_SIZE = 3        # Number of individuals in tournament selection
+CROSSOVER_RATE = 0.8       # Probability of performing crossover
+MUTATION_RATE = 0.1        # Probability of mutation on each variable
 
-# Initialize population with random chromosomes
-def init_population():
-    population = []
-    for _ in range(POP_SIZE):
-        chromosome = ''.join(['0' if (i % 2 == 0) else '1' for i in range(TOTAL_BITS)])
-        population.append(chromosome)
-    return population
+# Function to generate a random individual
+def create_individual():
+    return (random.uniform(DOMAIN_MIN, DOMAIN_MAX), random.uniform(DOMAIN_MIN, DOMAIN_MAX))
 
-# Simple tournament selection for parents
-def selection(pop):
-    new_pop = []
-    for _ in range(POP_SIZE):
-        ind1 = pop[random_index(custom_len(pop))]
-        ind2 = pop[random_index(custom_len(pop))]
-        new_pop.append(ind1 if fitness(ind1) > fitness(ind2) else ind2)
-    return new_pop
+# Create initial population
+def create_population():
+    return [create_individual() for _ in range(POPULATION_SIZE)]
 
-# Crossover process between two parents
+# Evaluate fitness of each individual (the smaller the objective value, the better)
+def evaluate_population(population):
+    return [(individual, objective(*individual)) for individual in population]
+
+# Selection: Tournament Selection
+def tournament_selection(evaluated_pop):
+    tournament = random.sample(evaluated_pop, TOURNAMENT_SIZE)
+    tournament.sort(key=lambda x: x[1])  # Minimize objective
+    return tournament[0][0]
+
+# Crossover: Arithmetic Crossover
 def crossover(parent1, parent2):
-    if random_index(1) < PC:
-        point = random_index(TOTAL_BITS - 1) + 1
-        return parent1[:point] + parent2[point:], parent2[:point] + parent1[point:]
+    if random.random() < CROSSOVER_RATE:
+        # Encode parents to binary
+        parent1_bin = encode_to_binary(parent1[0]) + encode_to_binary(parent1[1])
+        parent2_bin = encode_to_binary(parent2[0]) + encode_to_binary(parent2[1])
+        
+        # Perform crossover on binary strings
+        crossover_point = random.randint(1, len(parent1_bin) - 1)
+        child1_bin = parent1_bin[:crossover_point] + parent2_bin[crossover_point:]
+        child2_bin = parent2_bin[:crossover_point] + parent1_bin[crossover_point:]
+        
+        # Decode back to real values
+        return decode(child1_bin), decode(child2_bin)
     return parent1, parent2
 
-# Mutation process: each bit has a chance PM to flip
-def mutate(chromosome):
-    return ''.join(['1' if bit == '0' and random_index(1) < PM else '0' if bit == '1' and random_index(1) < PM else bit for bit in chromosome])
+# Mutation: Adding random disturbance to each variable
+def mutate(individual):
+    x1, x2 = individual
+    if random.random() < MUTATION_RATE:
+        x1 += random.uniform(-1, 1)
+    if random.random() < MUTATION_RATE:
+        x2 += random.uniform(-1, 1)
+    return max(min(x1, DOMAIN_MAX), DOMAIN_MIN), max(min(x2, DOMAIN_MAX), DOMAIN_MIN)
 
-# Main genetic algorithm function
+# Main Genetic Algorithm
 def genetic_algorithm():
-    population = init_population()
-    best_chromosome = None
-    best_value = float('inf')
+    population = create_population()
     
-    for gen in range(GENERATIONS):
-        pop_evaluated = [(chrom, objective(*decode(chrom))) for chrom in population]
-        for chrom, f_val in pop_evaluated:
-            if f_val < best_value:
-                best_value = f_val
-                best_chromosome = chrom
-        
-        mating_pool = selection(population)
+    for generation in range(GENERATIONS):
+        evaluated_pop = evaluate_population(population)
         new_population = []
         
-        for i in range(0, POP_SIZE, 2):
-            parent1 = mating_pool[i]
-            parent2 = mating_pool[i + 1] if i + 1 < POP_SIZE else mating_pool[0]
+        while len(new_population) < POPULATION_SIZE:
+            parent1 = tournament_selection(evaluated_pop)
+            parent2 = tournament_selection(evaluated_pop)
+            
             child1, child2 = crossover(parent1, parent2)
-            new_population.extend([mutate(child1), mutate(child2)])
+            child1 = mutate(child1)
+            child2 = mutate(child2)
+            
+            new_population.append(child1)
+            if len(new_population) < POPULATION_SIZE:
+                new_population.append(child2)
         
-        population = new_population[:POP_SIZE]
+        population = new_population
+        
+        best_individual, best_value = min(evaluate_population(population), key=lambda x: x[1])
+        print(f"Generation {generation + 1}: Best = {best_individual} with value = {best_value:.4f}")
+        
+        # Print the binary representation of the best individual
+        binary_representation_1 = encode_to_binary(best_individual[0])
+        binary_representation_2 = encode_to_binary(best_individual[1])
+        binary_representation_total = binary_representation_1 + binary_representation_2
+        print(f"Binary representation of first best individual {binary_representation_1}, second best individual {binary_representation_2}, and total best individual: {binary_representation_total}")
+        # Print the binary representation of the best value
+        best_value_binary = encode_to_binary(best_value)
+        print(f"Best value in binary: {best_value_binary}")
     
-    best_x1, best_x2 = decode(best_chromosome)
-    return best_chromosome, best_x1, best_x2, best_value
+    evaluated_pop = evaluate_population(population)
+    best_individual, best_value = min(evaluated_pop, key=lambda x: x[1])
+    return best_individual, best_value
 
-# Execute the program
+# Running the genetic algorithm
 if __name__ == "__main__":
-    best_chrom, best_x1, best_x2, best_obj = genetic_algorithm()
-    print("Best Chromosome:", best_chrom)
-    print("Value x1 =", best_x1)
-    print("Value x2 =", best_x2)
-    print("Objective Value =", best_obj)
+    best_solution, best_score = genetic_algorithm()
+    print("\nBest solution found:")
+    print(f"x1 = {best_solution[0]:.4f}, x2 = {best_solution[1]:.4f}, with value = {best_score:.4f}")
+    
+    # Print the binary representation of the best solution
+    best_solution_bin_1 = encode_to_binary(best_solution[0])
+    best_solution_bin_2 = encode_to_binary(best_solution[1])
+    best_solution_bin_total = best_solution_bin_1 + best_solution_bin_2
+    print(f"Binary representation of the best first solution {best_solution_bin_1}, the best second solution {best_solution_bin_2}, and total best solution  {best_solution_bin_total}")
+    # Print the binary number of the best score
+    best_score_binary = encode_to_binary(int(best_score))
+    print(f"Binary representation of the best score: {best_score_binary}")
+
+    # Additional Task: Print comparison of binary numbers after crossover and mutation
+    print("\nComparison of binary numbers after crossover and mutation:")
+    for individual in create_population():
+        binary_representation_1 = encode_to_binary(individual[0])
+        binary_representation_2 = encode_to_binary(individual[1])
+        binary_representation_total = binary_representation_1 + binary_representation_2
+        print(f"Individual: {individual}, Binary1: {binary_representation_1}, Binary2: {binary_representation_2}, sum: {binary_representation_total}")
