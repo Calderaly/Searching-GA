@@ -1,18 +1,18 @@
 ; Using Steel Bank Common Lisp Compiler.
 ; Other Common Lisp compiler may have it's own implementation for codes below
 
-;; Constants
+; Constants
 (defparameter *bits* 10)  ;; Number of bits for binary representation
 (defparameter *domain-min* -10)
 (defparameter *domain-max* 10)
 
-;; Function to convert binary representation to real value in the interval [lower, upper]
+; Function to convert binary representation to real value in the interval [lower, upper]
 (defun binary-to-real (bin-str &optional (lower *domain-min*) (upper *domain-max*))
   (let* ((nilai-int (parse-integer bin-str :radix 2))  ;; Convert binary to integer
          (max-int (1- (expt 2 *bits*))))  ;; Maximum possible value
     (+ lower (* (/ (- upper lower) max-int) nilai-int))))
 
-;; Function to decode chromosome to get values x1 and x2
+; Function to decode chromosome to get values x1 and x2
 (defun decode (chromosome)
   (let* ((x1-bin (subseq chromosome 0 *bits*))
          (x2-bin (subseq chromosome *bits*))
@@ -20,46 +20,47 @@
          (x2 (binary-to-real x2-bin)))
     (values x1 x2)))
 
-;; Function to encode numerical data types into binary
+; Function to encode numerical data types into binary
 (defun encode-to-binary (value)
   (cond
     ((integerp value) (format nil "~0,10b" value))
     ((floatp value) (format nil "~0,10b" (truncate (* (/ (- value *domain-min*) (- *domain-max* *domain-min*)) (1- (expt 2 *bits*))))))
     (t (error "Unsupported data type for encoding."))))
 
-;; Objective function to be minimized
+; Objective function to be minimized
 (defun objective (x1 x2)
   (+ (expt x1 2) (expt x2 2)))
 
-;; Genetic algorithm parameters
+; Genetic algorithm parameters
 (defparameter *population-size* 20)       ;; Number of individuals in the population
 (defparameter *generations* 50)            ;; Number of generations
 (defparameter *tournament-size* 3)         ;; Number of individuals in tournament selection
 (defparameter *crossover-rate* 0.8)        ;; Probability of performing crossover
 (defparameter *mutation-rate* 0.1)         ;; Probability of mutation on each variable
 
-;; Function to generate a random individual
+; Function to generate a random individual
 (defun create-individual ()
   (values (+ *domain-min* (random (- *domain-max* *domain-min*))
           (+ *domain-min* (random (- *domain-max* *domain-min*))))))
 
-;; Create initial population
+; Create initial population
 (defun create-population ()
   (loop for i from 1 to *population-size*
         collect (create-individual)))
 
-;; Evaluate fitness of each individual (the smaller the objective value, the better)
+; Evaluate fitness of each individual (the smaller the objective value, the better)
 (defun evaluate-population (population)
   (loop for individual in population
-        collect (cl-tuples:make (list individual (apply 'objective individual)))))
+        ; collect (cl-tuples:make (list individual (apply 'objective individual)))
+        collect (cl-tuples:make (values individual (apply 'objective individual)))))
 
-;; Selection: Tournament Selection
+; Selection: Tournament Selection
 (defun tournament-selection (evaluated-pop)
   (let ((tournament (loop for individual in (loop repeat *tournament-size* collect (nth (random (length evaluated-pop)) evaluated-pop))
                           collect individual)))
     (reduce (lambda (a b) (if (< (second a) (second b)) a b)) tournament)))
 
-;; Crossover: Arithmetic Crossover
+; Crossover: Arithmetic Crossover
 (defun crossover (parent1 parent2)
   (if (< (random 1.0) *crossover-rate*)
       (let* ((parent1-bin (concatenate 'string (encode-to-binary (first parent1)) (encode-to-binary (second parent1))))
@@ -70,7 +71,7 @@
           (values child1 child2)))
       (values parent1 parent2)))
 
-;; Mutation: Adding random disturbance to each variable
+; Mutation: Adding random disturbance to each variable
 (defun mutate (individual)
   (multiple-value-bind (x1 x2) individual
     (when (< (random 1.0) *mutation-rate*)
@@ -79,7 +80,7 @@
       (setf x2 (min (max (+ x2 (random 2.0 -1.0)) *domain-min*) *domain-max*)))
     (values x1 x2)))
 
-;; Main Genetic Algorithm
+; Main Genetic Algorithm
 (defun genetic-algorithm ()
   (let ((population (create-population)))
     (loop for generation from 1 to *generations*
@@ -107,7 +108,7 @@
     (multiple-value-bind (best-individual best-value) (reduce (lambda (a b) (if (< (second a) (second b)) a b)) (evaluate-population population))
       (values best-individual best-value))))
 
-;; Running the genetic algorithm
+; Running the genetic algorithm
 (defun main ()
   (multiple-value-bind (best-solution best-score) (genetic-algorithm)
     (format t "~%Best solution found:~%x1 = ~A, x2 = ~A, with value = ~A~%"
