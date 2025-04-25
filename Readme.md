@@ -15,7 +15,7 @@ docker compose up --build
 Wait until the process finised. After finished running this program with
 
 ```bash
-docker start -ai python-ga
+docker start -ai app
 ```
 
 ## Contributing
