@@ -136,7 +136,7 @@ def main():
 
     for generasi in range(GENERATIONS_SIZE):
         evaluatedPopulation = CalculateFitnessValues(population)
-        evaluatedPopulation.sort(key=lambda x: x['objective'], reverse=False)  # Sort asscend untuk minimalisasi
+        evaluatedPopulation.sort(key=lambda x: x['objective'], reverse=False)  # Sort ascending for minimization
 
         bestIndividual = evaluatedPopulation[0]  # Get the best individual
         if bestSolutionOverall is None or bestIndividual['objective'] > bestSolutionOverall['objective']:
@@ -174,16 +174,18 @@ def main():
         print("\nSolusi terbaik ditemukan(Minimalisasi): ")
         print(f"Kromosom: {bestSolutionOverall['chromosome'][:15]}...{bestSolutionOverall['chromosome'][-15:]}")
         print(f"Nilai x1 dan x2: ({bestSolutionOverall['x1']:.4f}, {bestSolutionOverall['x2']:.4f})")
-        print(f"Nilai Fungsi Objektif (Minimum): {bestSolutionOverall['objective']:.6f}") # Menambahkan fungsi objektif
+        print(f"Nilai Fungsi Objektif (Minimum): {bestSolutionOverall['objective']:.6f}") # Added the objective function
     else:
         print("\nTidak ada solusi terbaik yang ditemukan.")
 
-    # Hasil top 3 dari seleksi, rekombinasi, dan mutasi di atas
+    # The summary of the fitness, crossover, and mutation loop. Do not change this
     print("\nTop 3 individu di populasi terakhir:")
     finalEvaluatedPopulation = CalculateFitnessValues(population)
-    finalEvaluatedPopulation.sort(key=lambda x: x['objective'], reverse=True)
+    finalEvaluatedPopulation.sort(key=lambda x: x['objective'], reverse=False)
     for i, ind in enumerate(finalEvaluatedPopulation[:3]):
         print(f" {i + 1}. Nilai fitness: {ind['objective']:.6f}, (x1 = {ind['x1']:.4f}, x2 = {ind['x2']:.4f})")
+
+
 
 if __name__ == "__main__":
     main()
