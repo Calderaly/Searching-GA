@@ -219,10 +219,13 @@ def main():
         
         x1_bin = bestIndividual['chromosome'][:BITS_PER_VARIABEL]
         x2_bin = bestIndividual['chromosome'][BITS_PER_VARIABEL:]
-        fitness_bin =  ''.join(['1' if bit == '1' else '0' for bit in bin(math.ceil(bestIndividual['objective']))[2:].zfill(BITS_PER_VARIABEL)])
-        print(f"generasi {generasi + 1}/{GENERATIONS_SIZE} = x1: {bestIndividual['x1']:.4f} (bin: {x1_bin}), x2: {bestIndividual['x2']:.4f} (bin: {x2_bin}), fitness: {bestIndividual['objective']:.4f} (bin: {fitness_bin})")
+        fitness_bin =  ''.join(['1' if bit == '1' else '0' for bit in bin(math.ceil(bestIndividual['objective']))[2:].zfill(
+            BITS_PER_VARIABEL)])
+        print(f"generasi {generasi + 1}/{GENERATIONS_SIZE} = x1: {bestIndividual['x1']:.4f} (bin: {x1_bin}), x2: 
+        {bestIndividual['x2']:.4f} (bin: {x2_bin}), fitness: {bestIndividual['objective']:.4f} (bin: {fitness_bin})")
         if generasi > 0:
-            print(f"  Orang Tua Terbaik: {parent1_chromosome_best[:10]}...{parent1_chromosome_best[-10:]}, {parent2_chromosome_best[:10]}...{parent2_chromosome_best[-10:]}")
+            print(f"  Orang Tua Terbaik: {parent1_chromosome_best[:10]}...{parent1_chromosome_best[-10:]}, 
+            {parent2_chromosome_best[:10]}...{parent2_chromosome_best[-10:]}")
 
         newPopulation = [evaluatedPopulation[i]['chromosome'] for i in range(BEST_INDIVIDUAL)]  # Elitism
         
@@ -257,8 +260,10 @@ def main():
     for i, ind in enumerate(finalEvaluatedPopulation[:3]):
         x1_bin_top3 = ind['chromosome'][:BITS_PER_VARIABEL]
         x2_bin_top3 = ind['chromosome'][BITS_PER_VARIABEL:]
-        fitness_bin_top3 = ''.join(['1' if bit == '1' else '0' for bit in bin(math.ceil(ind['objective']))[2:].zfill(BITS_PER_VARIABEL)])
-        print(f"  {i + 1}. Nilai fitness: {ind['objective']:.6f} (bin: {fitness_bin_top3})\n (x1 = {ind['x1']:.4f} (bin: {x1_bin_top3})\n x2 = {ind['x2']:.4f} (bin: {x2_bin_top3}))")
+        fitness_bin_top3 = ''.join(['1' if bit == '1' else '0' for bit in bin(math.ceil(ind['objective']))[2:].zfill(
+            BITS_PER_VARIABEL)])
+        print(f"  {i + 1}. Nilai fitness: {ind['objective']:.6f} (bin: {fitness_bin_top3})\n (x1 = {ind['x1']:.4f} (bin: 
+        {x1_bin_top3})\n x2 = {ind['x2']:.4f} (bin: {x2_bin_top3}))")
 
 
 
