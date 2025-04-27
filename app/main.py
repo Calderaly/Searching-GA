@@ -126,7 +126,7 @@ def ScrambleMutation(chromosome):
     return chromosome
 
 
-def genetic_algorithm(population):
+def geneticAlgorithm(population):
     bestSolutionOverall = None
     noImprovementCount = 0
 
@@ -160,7 +160,7 @@ def genetic_algorithm(population):
         population = newPopulation
     return population, bestSolutionOverall
 
-def print_results(start_time, end_time, bestSolutionOverall, population):
+def printResults(start_time, end_time, bestSolutionOverall, population):
     # Hasil akhir
     print("-" * 30)
     print("---Evolusi Selesai---")
@@ -184,9 +184,9 @@ def print_results(start_time, end_time, bestSolutionOverall, population):
 def main():
     startTime = time.time()
     population = InitPopulation(POPULATION_SIZE)
-    population, bestSolutionOverall = genetic_algorithm(population)
+    population, bestSolutionOverall = geneticAlgorithm(population)
     endTime = time.time()
-    print_results(startTime, endTime, bestSolutionOverall, population)
+    printResults(startTime, endTime, bestSolutionOverall, population)
 
 if __name__ == "__main__":
     main()
