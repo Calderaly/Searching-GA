@@ -11,7 +11,7 @@ CHROMOSOME_LENGTH = BITS_PER_VARIABEL * 2  # panjang chromosome
 POPULATION_SIZE = 2000  # jumlah populasi
 GENERATIONS_SIZE = 200  # jumlah generasi
 BEST_INDIVIDUAL = 2  # mempertahankan beberapa individu terbaik
-GENERATIONS_WITHOUT_IMPROVEMENT = 40  # limitation untuk hasil yang stagnan
+GENERATIONS_WITHOUT_IMPROVEMENT = 40  # limitasi untuk hasil yang stagnan
 
 # Operator GA
 CROSSOVER_RATE = 0.8  # pc
@@ -136,9 +136,9 @@ def main():
 
     for generasi in range(GENERATIONS_SIZE):
         evaluatedPopulation = CalculateFitnessValues(population)
-        evaluatedPopulation.sort(key=lambda x: x['objective'], reverse=False)  # Sort ascending for minimization
+        evaluatedPopulation.sort(key=lambda x: x['objective'], reverse=False)  # Sort ascending untuk minimasi
 
-        bestIndividual = evaluatedPopulation[0]  # Get the best individual
+        bestIndividual = evaluatedPopulation[0]  # Dapatkann individu terbaik
         if bestSolutionOverall is None or bestIndividual['objective'] > bestSolutionOverall['objective']:
             bestSolutionOverall = bestIndividual
             lastBestFitness = bestIndividual['objective']
@@ -152,7 +152,7 @@ def main():
             print(f"\nTidak ada perubahan selama {GENERATIONS_WITHOUT_IMPROVEMENT} generasi. Evolusi dihentikan.")
             break
 
-        newPopulation = [evaluatedPopulation[i]['chromosome'] for i in range(BEST_INDIVIDUAL)]  # Elitism
+        newPopulation = [evaluatedPopulation[i]['chromosome'] for i in range(BEST_INDIVIDUAL)]  # Elitisme
 
         while len(newPopulation) < POPULATION_SIZE:
             parents = RoulletteWheelSelection(population, evaluatedPopulation, ROULLETE_SIZE)
@@ -174,11 +174,11 @@ def main():
         print("\nSolusi terbaik ditemukan(Minimalisasi): ")
         print(f"Kromosom: {bestSolutionOverall['chromosome'][:15]}...{bestSolutionOverall['chromosome'][-15:]}")
         print(f"Nilai x1 dan x2: ({bestSolutionOverall['x1']:.4f}, {bestSolutionOverall['x2']:.4f})")
-        print(f"Nilai Fungsi Objektif (Minimum): {bestSolutionOverall['objective']:.6f}") # Added the objective function
+        print(f"Nilai Fungsi Objektif (Minimum): {bestSolutionOverall['objective']:.6f}") # Menambahkan fungsi objektif
     else:
         print("\nTidak ada solusi terbaik yang ditemukan.")
 
-    # The summary of the fitness, crossover, and mutation loop. Do not change this
+    # Rangkuman dari nilai fitness, rekombinasi, dan mutasi
     print("\nTop 3 individu di populasi terakhir:")
     finalEvaluatedPopulation = CalculateFitnessValues(population)
     finalEvaluatedPopulation.sort(key=lambda x: x['objective'], reverse=False)
