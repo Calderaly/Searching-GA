@@ -41,7 +41,7 @@
       (let ((term1 (* (sin x1) (cos x2) (tan (+ x1 x2))))
             (term2 (* (/ 3 4) (exp (- 1 (sqrt (expt x1 2)))))))
         (let ((result (- (+ term1 term2))))  ; Minimalkan fungsi ini
-          ; Menggunakan numberp dan finitep untuk mengecek validasi angka dan validasi bilangan tak hingga
+          ; Mengecek hasil dari perhitungan dalam if-else untuk menyederhanakan error handling (menggunakan numberp dan finitep)
           (if (or (not (numberp result)) (not (finitep result)))
               (float '-inf)
               result)))
@@ -138,13 +138,17 @@
           (setf segment (loop for k from 0 below (length segment) collect (char segment k)))
           (setf segment (sort segment #'(lambda (a b) (< (random 1.0) 0.5)))) ; Shuffle dengan sort
           (concatenate 'string (subseq chromosome 0 i) (coerce segment 'string') (subseq chromosome (1+ j)))))
-      chromosome))
+      return chromosome)
+      ; Asumsi perhitungan di atas hanya mengembalikan nilai dalam if (bisa salah)
+      ; dimana chromosome dikerjakan di dalam fungsi concatenate, baru di return
+      (return chromosome))
 
 (defun binary-string-to-integer (binary-string)
   (parse-integer binary-string :radix 2))
 
 (defun main ()
   "Fungsi utama yang menjalankan algoritma genetika."
+  ; Disini, get-internal-run time adalah ekuivalensi untuk time.time() dari Python (dapatkan waktu nyata dari sistem)
   (let* ((start-time (get-internal-run-time))
          (population (init-population +population-size+))
          (best-solution-overall nil)
@@ -210,6 +214,7 @@
           (format t "Nilai Fungsi Objektif (Minimum): ~,6f~%" (getf best-solution-overall :objective)))
         (format t "~%Tidak ada solusi terbaik yang ditemukan.~%"))
     
+    ; Ringkasan dari nilai loop fitness, rekombinasi, dan mutasi.
     (format t "~%Top 3 individu di populasi terakhir:~%")
     (let ((final-evaluated-population (calculate-fitness-values population)))
       (setf final-evaluated-population (sort final-evaluated-population #'< :key #'(lambda (x) (getf x :objective))))

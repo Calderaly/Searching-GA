@@ -51,6 +51,7 @@ def ObjectiveFunction(x1, x2):
         term2 = (3 / 4) * math.exp(1 - math.sqrt(x1 ** 2))
         result = -(term1 + term2)  # Minimalkan fungsi ini
 
+        # Mengecek hasil dari perhitungan dalam if-else untuk menyederhanakan error handling
         if math.isnan(result) or math.isinf(result):
             return float('-inf')
         else:
@@ -253,7 +254,7 @@ def main():
     else:
         print("\nTidak ada solusi terbaik yang ditemukan.")
 
-    # Ringkasan dari loop fitness, crossover, dan mutasi. Jangan diubah.
+    # Ringkasan dari nilai loop fitness, rekombinasi, dan mutasi.
     print("\nTop 3 individu di populasi terakhir:")
     finalEvaluatedPopulation = CalculateFitnessValues(population)
     finalEvaluatedPopulation.sort(key=lambda x: x['objective'], reverse=False)
