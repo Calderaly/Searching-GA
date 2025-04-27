@@ -248,8 +248,9 @@ def geneticAlgorithm(population):
 
         # Tambahkan variasi dengan meningkatkan mutation rate saat stagnan
         currentMutationRate = MUTATION_RATE
-        if generasiStagnant > 20:
+        if generasiStagnant > 25:
             currentMutationRate = MUTATION_RATE * 3  # Tingkatkan mutasi
+            MUTATION_RATE = currentMutationRate
             print(f"  Meningkatkan variasi genetik (mutation rate: {currentMutationRate:.4f})")
 
         while len(newPopulation) < POPULATION_SIZE:
@@ -267,10 +268,11 @@ def geneticAlgorithm(population):
                 newPopulation.pop()
 
         # Tambahkan beberapa individu acak jika terlalu stagnan
-        if generasiStagnant > 20:
+        if generasiStagnant > 35:
             randomIndCount = POPULATION_SIZE // 20  # 5% individu baru
             randomIndividuals = InitPopulation(randomIndCount)
             newPopulation = newPopulation[:-randomIndCount] + randomIndividuals
+            POPULATION_SIZE = randomIndCount
             print(f"  Menambahkan {randomIndCount} individu acak untuk meningkatkan keragaman populasi.")
 
         population = newPopulation
