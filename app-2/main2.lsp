@@ -47,9 +47,9 @@
         (let ((result (- (+ term1 term2))))  ; Minimalkan fungsi ini
           ; Mengecek hasil dari perhitungan dalam if-else untuk menyederhanakan error handling (menggunakan numberp dan finitep)
           (if (or (not (numberp result)) (not (finitep result)))
-              (float '-inf)
+              (floating-point-overflow)
               result)))
-    (error () ; Menangkap OverflowError dan berbagai error lain
+    (floating-point-overflow () ; Menangkap OverflowError di Common Lisp
       (float '-inf))))
 
 

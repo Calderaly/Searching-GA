@@ -53,7 +53,7 @@ def ObjectiveFunction(x1, x2):
 
         # Mengecek hasil dari perhitungan dalam if-else untuk menyederhanakan error handling
         if math.isnan(result) or math.isinf(result):
-            return float('-inf')
+            raise OverflowError
         else:
             return result
     except OverflowError:
