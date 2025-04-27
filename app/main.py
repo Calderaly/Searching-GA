@@ -191,6 +191,7 @@ def geneticAlgorithm(population):
     lastBestFitness = float('-inf')
     noImprovementCount = 0
     generasiStagnant = 0  # Penghitung generasi stagnan
+    global MUTATION_RATE, POPULATION_SIZE # Memberi tahu Python bahwa variabel global ini akan diakses oleh variabel lokal 
 
     # Track nilai-nilai terbaik sebelumnya untuk membandingkan
     previousBestValues = []
@@ -272,7 +273,7 @@ def geneticAlgorithm(population):
             randomIndCount = POPULATION_SIZE // 20  # 5% individu baru
             randomIndividuals = InitPopulation(randomIndCount)
             newPopulation = newPopulation[:-randomIndCount] + randomIndividuals
-            POPULATION_SIZE = randomIndCount
+            POPULATION_SIZE = newPopulation
             print(f"  Menambahkan {randomIndCount} individu acak untuk meningkatkan keragaman populasi.")
 
         population = newPopulation
