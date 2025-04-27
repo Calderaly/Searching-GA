@@ -147,5 +147,5 @@ if __name__ == "__main__":
         binary_representation_1 = encode_to_binary(individual[0])
         binary_representation_2 = encode_to_binary(individual[1])
         binary_representation_total = binary_representation_1 + binary_representation_2
-        print(f"Individual: {individual}, Binary1: {binary_representation_1}, Binary2: {binary_representation_2}, 
-            sum: {binary_representation_total}")
+        print(f"Individual: {individual}, Binary1: {binary_representation_1}, Binary2: {binary_representation_2}, " 
+        + f" sum: {binary_representation_total}")
