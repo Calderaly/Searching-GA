@@ -11,7 +11,7 @@ CHROMOSOME_LENGTH = BITS_PER_VARIABEL * 2   # Panjang kromosom
 POPULATION_SIZE = 2000   # Ukuran populasi
 GENERATIONS_SIZE = 200   # Jumlah generasi
 BEST_INDIVIDUAL = 2   # Jumlah individu terbaik yang dipertahankan
-GENERATIONS_WITHOUT_IMPROVEMENT = 10   # Batas untuk hasil yang stagnan
+GENERATIONS_WITHOUT_IMPROVEMENT = 20   # Batas untuk hasil yang stagnan
 
 # Operator GA
 CROSSOVER_RATE = 0.8   # Peluang crossover
@@ -231,8 +231,14 @@ def geneticAlgorithm(population):
             print(f"  Tidak ada perubahan nilai maksimum selama {len(previousBestValues)} generasi terakhir.")
 
         # Jika stagnan terlalu lama, tampilkan pesan lebih jelas
-        if generasiStagnant >= 10:
+        if generasiStagnant >= 20:
             print(f"  Peringatan: Nilai optimum tidak berubah selama {generasiStagnant} generasi.")
+            # currentMutationRate = MUTATION_RATE * 3  <- Tingkatkan mutasi begitu terjadi stagnan
+            # print(f" Meningkatkan variasi genetik (mutation rate: {currentMutationRate:.4f})")
+            # randomIndCount = POPULATION_SIZE // 20  <- 5% individu baru begitu terjadi stagnan
+            # randomIndividuals = InitPopulation(randomIndCount)
+            # newPopulation = newPopulation[:-randomIndCount] + randomIndividuals
+            # print(f" Menambahkan {randomIndCount} individu acak untuk meningkatkan keragaman populasi.")
 
         if noImprovementCount >= GENERATIONS_WITHOUT_IMPROVEMENT:
             print(f"\nTidak ada perubahan signifikan selama {GENERATIONS_WITHOUT_IMPROVEMENT} generasi. Evolusi dihentikan.")
@@ -242,7 +248,7 @@ def geneticAlgorithm(population):
 
         # Tambahkan variasi dengan meningkatkan mutation rate saat stagnan
         currentMutationRate = MUTATION_RATE
-        if generasiStagnant > 15:
+        if generasiStagnant > 20:
             currentMutationRate = MUTATION_RATE * 3  # Tingkatkan mutasi
             print(f"  Meningkatkan variasi genetik (mutation rate: {currentMutationRate:.4f})")
 
@@ -261,7 +267,7 @@ def geneticAlgorithm(population):
                 newPopulation.pop()
 
         # Tambahkan beberapa individu acak jika terlalu stagnan
-        if generasiStagnant > 25:
+        if generasiStagnant > 20:
             randomIndCount = POPULATION_SIZE // 20  # 5% individu baru
             randomIndividuals = InitPopulation(randomIndCount)
             newPopulation = newPopulation[:-randomIndCount] + randomIndividuals
@@ -273,7 +279,7 @@ def geneticAlgorithm(population):
 
 def printFinalResults(population, startTime, endTime, bestSolutionOverall):
     print("-" * 30)
-    print("---Evolusi Selesai---")
+    print("-------Evolusi Selesai--------")
     print(f"Waktu eksekusi: {endTime - startTime:.2f} detik")
 
     if bestSolutionOverall:
@@ -290,6 +296,7 @@ def printFinalResults(population, startTime, endTime, bestSolutionOverall):
     finalEvaluatedPopulation.sort(key=lambda x: x['objective'], reverse=False)
     for i, ind in enumerate(finalEvaluatedPopulation[:3]):
         print(f"  {i + 1}. Nilai fitness: {ind['objective']:.6f}, (x1 = {ind['x1']:.4f}, x2 = {ind['x2']:.4f})")
+    print("-" * 30)
 
 
 def main():
