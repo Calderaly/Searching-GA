@@ -1,27 +1,27 @@
 import random, math, time
 
 # Config population
-BITS_PER_VARIABEL = 32  # jumlahh bit per variabel
-RANGE_UPPER_BOUND = 10.0  # batas bawah x1 dan x2
-RANGE_LOWER_BOUND = -10.0  # batas atas x1 dan x2
-RANGE_DOMAIN = RANGE_UPPER_BOUND - RANGE_LOWER_BOUND  # range x1 dan x2
-CHROMOSOME_LENGTH = BITS_PER_VARIABEL * 2  # panjang chromosome
+BITS_PER_VARIABEL = 32 # jumlahh bit per variabel
+RANGE_UPPER_BOUND = 10.0 # batas bawah x1 dan x2
+RANGE_LOWER_BOUND = -10.0 # batas atas x1 dan x2
+RANGE_DOMAIN = RANGE_UPPER_BOUND - RANGE_LOWER_BOUND # range x1 dan x2
+CHROMOSOME_LENGTH = BITS_PER_VARIABEL * 2 # panjang chromosome
 
 # Parameter GA
-POPULATION_SIZE = 2000  # jumlah populasi
-GENERATIONS_SIZE = 200  # jumlah generasi
-BEST_INDIVIDUAL = 2  # mempertahankan beberapa individu terbaik
-GENERATIONS_WITHOUT_IMPROVEMENT = 40  # limitasi untuk hasil yang stagnan
+POPULATION_SIZE = 2000 #jumlah populasi
+GENERATIONS_SIZE = 200 # jumlah generasi
+BEST_INDIVIDUAL = 2 # mempertahankan beberapa individu terbaik
+GENERATIONS_WITHOUT_IMPROVEMENT = 40 # limitasi untuk hasil yang stagnan
 
 # Operator GA
-CROSSOVER_RATE = 0.8  # pc
-MUTATION_RATE = 0.01  # pm
-ROULLETE_SIZE = 5  # jumlah seleksi pada roullete wheel untuk mendapatkan parent
+CROSSOVER_RATE = 0.8 # pc
+MUTATION_RATE = 0.01 # pm
+ROULLETE_SIZE = 5 # jumlah seleksi pada roullete wheel untuk mendapatkan parent
 
 
 def InitPopulation(populationSize):
     population = []
-
+    
     for _ in range(populationSize):
         population.append(''.join(random.choice('01') for _ in range(CHROMOSOME_LENGTH)))
 
@@ -60,7 +60,7 @@ def DecodeChromosome(chromosome):
 
 
 
-def CalculateFitnessValues(population):  # Ganti populationSize jadi population
+def CalculateFitnessValues(population): # Ganti populationSize jadi population
     fitness_values = []
 
     for chromosome in population:
@@ -93,7 +93,7 @@ def RoulletteWheelSelection(population, fitnessValues, size):
     winner = [(f / totalAdjustedFitness) for f in adjustedFitnessValue]
     parents = random.choices(population, winner, k=size)
 
-    return parents  # berisi orang tua yang terbaik
+    return parents # berisi orang tua yang terbaik
 
 
 
@@ -108,7 +108,7 @@ def UniformCrossover(parent1, parent2, crossoverRate):
         else:
             child1 += parent2[i]
             child2 += parent1[i]
-
+    
     return child1, child2
 
 
@@ -126,22 +126,17 @@ def ScrambleMutation(chromosome):
     return chromosome
 
 
-
-def main():
-    startTime = time.time()
-    population = InitPopulation(POPULATION_SIZE)
+def genetic_algorithm(population):
     bestSolutionOverall = None
-    lastBestFitness = float('-inf')
     noImprovementCount = 0
 
     for generasi in range(GENERATIONS_SIZE):
         evaluatedPopulation = CalculateFitnessValues(population)
-        evaluatedPopulation.sort(key=lambda x: x['objective'], reverse=False)  # Sort ascending untuk minimasi
+        evaluatedPopulation.sort(key=lambda x: x['objective'], reverse=False)
 
-        bestIndividual = evaluatedPopulation[0]  # Dapatkann individu terbaik
+        bestIndividual = evaluatedPopulation[0]
         if bestSolutionOverall is None or bestIndividual['objective'] > bestSolutionOverall['objective']:
             bestSolutionOverall = bestIndividual
-            lastBestFitness = bestIndividual['objective']
             noImprovementCount = 0
         else:
             noImprovementCount += 1
@@ -152,7 +147,7 @@ def main():
             print(f"\nTidak ada perubahan selama {GENERATIONS_WITHOUT_IMPROVEMENT} generasi. Evolusi dihentikan.")
             break
 
-        newPopulation = [evaluatedPopulation[i]['chromosome'] for i in range(BEST_INDIVIDUAL)]  # Elitisme
+        newPopulation = [evaluatedPopulation[i]['chromosome'] for i in range(BEST_INDIVIDUAL)]
 
         while len(newPopulation) < POPULATION_SIZE:
             parents = RoulletteWheelSelection(population, evaluatedPopulation, ROULLETE_SIZE)
@@ -163,12 +158,13 @@ def main():
             if len(newPopulation) > POPULATION_SIZE:
                 newPopulation.pop()
         population = newPopulation
+    return population, bestSolutionOverall
 
-    endTime = time.time()
+def print_results(start_time, end_time, bestSolutionOverall, population):
     # Hasil akhir
     print("-" * 30)
     print("---Evolusi Selesai---")
-    print(f"Waktu eksekusi: {endTime - startTime:.2f} detik")
+    print(f"Waktu eksekusi: {end_time - start_time:.2f} detik")
 
     if bestSolutionOverall:
         print("\nSolusi terbaik ditemukan(Minimalisasi): ")
@@ -185,7 +181,12 @@ def main():
     for i, ind in enumerate(finalEvaluatedPopulation[:3]):
         print(f" {i + 1}. Nilai fitness: {ind['objective']:.6f}, (x1 = {ind['x1']:.4f}, x2 = {ind['x2']:.4f})")
 
-
+def main():
+    startTime = time.time()
+    population = InitPopulation(POPULATION_SIZE)
+    population, bestSolutionOverall = genetic_algorithm(population)
+    endTime = time.time()
+    print_results(startTime, endTime, bestSolutionOverall, population)
 
 if __name__ == "__main__":
     main()
