@@ -1,6 +1,10 @@
 ; This version of Common Lisp code is of SBCL compiler standard
 ; Other Common Lisp compiler/ interpreter might have different implementation
 
+(defpackage :genetic-searching 
+  (:use :cl :cl-tuples))
+(in-package :my-package)
+
 (defconstant +bits-per-variable+ 32) ; Jumlah bit per variabel
 (defconstant +range-upper-bound+ 10.0) ; Batas atas x1 dan x2
 (defconstant +range-lower-bound+ -10.0) ; Batas bawah x1 dan x2
@@ -78,7 +82,7 @@
     List: List yang berisi dictionary dengan informasi kromosom, x1, x2, dan nilai fitness."
   (loop for chromosome in population
         for (x1 x2) = (multiple-value-list (decode-chromosome chromosome))  ;unpack berbagai nilai
-        collect (list :chromosome chromosome :x1 x1 :x2 x2 :objective fitness)))
+        collect (cl-tuples:make(list :chromosome chromosome :x1 x1 :x2 x2 :objective fitness))))
 
 (defun roulette-wheel-selection (population fitness-values size)
   "Melakukan seleksi menggunakan metode rolet.
@@ -121,7 +125,7 @@
                  (progn
                    (setf (aref child1 i) (char parent2 i))
                    (setf (aref child2 i) (char parent1 i)))))
-    (values (coerce child1 'string') (coerce child2 'string')))) ; Konversi array
+    (cl-tuples:make(values (coerce child1 'string') (coerce child2 'string'))))) ; Konversi array
 
 (defun scramble-mutation (chromosome)
   "Melakukan mutasi scramble pada kromosom.

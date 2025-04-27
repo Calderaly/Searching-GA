@@ -1,6 +1,18 @@
 ; Using Steel Bank Common Lisp Compiler.
 ; Other Common Lisp compiler may have it's own implementation for codes below
 
+(defpackage :genetic-searching
+  (:use :ansi-cl :cl-tuples))
+(in-package :my-package)
+
+; Custom error function (Need to tested it's validity in SBCL)
+; In this example, the value-error condition includes a value slot to store the invalid value. 
+; The :report method customizes how the error is printed.
+; (define-condition value-error (simple-error)
+;  ((value :initarg :value :reader value-error-value))
+;  (:report (lambda (condition stream)
+;             (format stream "Invalid value: ~A" (value-error-value condition)))))
+
 ; Constants
 (defparameter *bits* 10)  ;; Number of bits for binary representation
 (defparameter *domain-min* -10)
@@ -25,23 +37,27 @@
   (cond
     ((integerp value) (format nil "~0,10b" value))
     ((floatp value) (format nil "~0,10b" (truncate (* (/ (- value *domain-min*) (- *domain-max* *domain-min*)) (1- (expt 2 *bits*))))))
-    (t (error "Unsupported data type for encoding."))))
+    (t (simple-error "Unsupported data type for encoding.")))) ; error in general is good, using this to specify the error
 
 ; Objective function to be minimized
 (defun objective (x1 x2)
   (+ (expt x1 2) (expt x2 2)))
 
 ; Genetic algorithm parameters
-(defparameter *population-size* 20)       ;; Number of individuals in the population
-(defparameter *generations* 50)            ;; Number of generations
-(defparameter *tournament-size* 3)         ;; Number of individuals in tournament selection
-(defparameter *crossover-rate* 0.8)        ;; Probability of performing crossover
-(defparameter *mutation-rate* 0.1)         ;; Probability of mutation on each variable
+(defparameter *population-size* 20) ; Number of individuals in the population
+(defparameter *generations* 50)     ; Number of generations
+(defparameter *tournament-size* 3)  ; Number of individuals in tournament selection
+(defparameter *crossover-rate* 0.8) ; Probability of performing crossover
+(defparameter *mutation-rate* 0.1)  ; Probability of mutation on each variable
 
 ; Function to generate a random individual
 (defun create-individual ()
   (values (+ *domain-min* (random (- *domain-max* *domain-min*))
           (+ *domain-min* (random (- *domain-max* *domain-min*))))))
+
+(defun create-individual ()
+  (cl-tuples:make  (values (+ *domain-min* (random (- *domain-max* *domain-min*))
+          (+ *domain-min* (random (- *domain-max* *domain-min*)))))))
 
 ; Create initial population
 (defun create-population ()

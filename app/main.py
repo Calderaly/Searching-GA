@@ -21,12 +21,15 @@ def decode(chromosome):
 
 # Function to encode numerical data types into binary
 def encode_to_binary(value):
-    if isinstance(value, int):
-        return format(value, f'0{BITS}b')
-    elif isinstance(value, float):
-        return format(int((value - DOMAIN_MIN) / (DOMAIN_MAX - DOMAIN_MIN) * (2**BITS - 1)), f'0{BITS}b')
-    else:
-        raise ValueError("Unsupported data type for encoding.")
+    try:
+        if isinstance(value, int):
+            return format(value, f'0{BITS}b')
+        elif isinstance(value, float):
+            return format(int((value - DOMAIN_MIN) / (DOMAIN_MAX - DOMAIN_MIN) * (2**BITS - 1)), f'0{BITS}b')
+        else:
+            raise ValueError("Unsupported data type for encoding.")
+    except ValueError as ve:
+        print(ve.args)
 
 # Objective function to be minimized
 def objective(x1, x2):

@@ -89,7 +89,7 @@ def DecodeChromosome(chromosome):
     binx2 = chromosome[BITS_PER_VARIABEL:]
     floatX1 = BinaryToFloat(binX1)
     floatX2 = BinaryToFloat(binx2)
-    return floatX1, floatX2
+    return (floatX1, floatX2)
 
 
 
@@ -164,7 +164,7 @@ def UniformCrossover(parent1, parent2, crossoverRate):
         else:
             child1 += parent2[i]
             child2 += parent1[i]
-    return child1, child2
+    return (child1, child2)
 
 
 
