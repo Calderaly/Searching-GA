@@ -82,7 +82,7 @@
     List: List yang berisi dictionary dengan informasi kromosom, x1, x2, dan nilai fitness."
   (loop for chromosome in population
         for (x1 x2) = (multiple-value-list (decode-chromosome chromosome))  ;unpack berbagai nilai
-        collect (cl-tuples:make(list :chromosome chromosome :x1 x1 :x2 x2 :objective fitness))))
+        collect (cl-tuples:make-tuple (list :chromosome chromosome :x1 x1 :x2 x2 :objective fitness))))
 
 (defun roulette-wheel-selection (population fitness-values size)
   "Melakukan seleksi menggunakan metode rolet.
@@ -126,7 +126,7 @@
                  (progn
                    (setf (aref child1 i) (char parent2 i))
                    (setf (aref child2 i) (char parent1 i)))))
-    (cl-tuples:make(values (coerce child1 'string') (coerce child2 'string'))))) ; Konversi array
+    (cl-tuples:make-tuple (values (coerce child1 'string') (coerce child2 'string'))))) ; Konversi array
 
 (defun scramble-mutation (chromosome)
   "Melakukan mutasi scramble pada kromosom.

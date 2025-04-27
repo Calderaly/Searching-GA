@@ -61,7 +61,7 @@
           (+ *domain-min* (random (- *domain-max* *domain-min*))))))
 
 (defun create-individual ()
-  (cl-tuples:make  (values (+ *domain-min* (random (- *domain-max* *domain-min*))
+  (cl-tuples:make-tuple (values (+ *domain-min* (random (- *domain-max* *domain-min*))
           (+ *domain-min* (random (- *domain-max* *domain-min*)))))))
 
 ; Create initial population
@@ -72,8 +72,8 @@
 ; Evaluate fitness of each individual (the smaller the objective value, the better)
 (defun evaluate-population (population)
   (loop for individual in population
-        ; collect (cl-tuples:make (list individual (apply 'objective individual)))
-        collect (cl-tuples:make (values individual (apply 'objective individual)))))
+        ; collect (cl-tuples:make-tuple (list individual (apply 'objective individual)))
+        collect (cl-tuples:make-tuple (values individual (apply 'objective individual)))))
 
 ; Selection: Tournament Selection
 (defun tournament-selection (evaluated-pop)
