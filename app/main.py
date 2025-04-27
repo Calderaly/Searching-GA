@@ -11,7 +11,7 @@ CHROMOSOME_LENGTH = BITS_PER_VARIABEL * 2   # Panjang kromosom
 POPULATION_SIZE = 2000   # Ukuran populasi
 GENERATIONS_SIZE = 200   # Jumlah generasi
 BEST_INDIVIDUAL = 2   # Jumlah individu terbaik yang dipertahankan
-GENERATIONS_WITHOUT_IMPROVEMENT = 20   # Batas untuk hasil yang stagnan
+GENERATIONS_WITHOUT_IMPROVEMENT = 40   # Batas untuk hasil yang stagnan
 
 # Operator GA
 CROSSOVER_RATE = 0.8   # Peluang crossover
@@ -249,7 +249,7 @@ def geneticAlgorithm(population):
 
         # Tambahkan variasi dengan meningkatkan mutation rate saat stagnan
         currentMutationRate = MUTATION_RATE
-        if generasiStagnant > 25:
+        if generasiStagnant > 45:
             currentMutationRate = MUTATION_RATE * 3  # Tingkatkan mutasi
             MUTATION_RATE = currentMutationRate
             print(f"  Meningkatkan variasi genetik (mutation rate: {currentMutationRate:.4f})")
@@ -269,7 +269,7 @@ def geneticAlgorithm(population):
                 newPopulation.pop()
 
         # Tambahkan beberapa individu acak jika terlalu stagnan
-        if generasiStagnant > 35:
+        if generasiStagnant > 55:
             randomIndCount = POPULATION_SIZE // 20  # 5% individu baru
             randomIndividuals = InitPopulation(randomIndCount)
             newPopulation = newPopulation[:-randomIndCount] + randomIndividuals
