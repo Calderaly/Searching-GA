@@ -2,7 +2,7 @@
 ; Other Common Lisp compiler may have it's own implementation for codes below
 
 (defpackage :genetic-searching
-  (:use :ansi-cl :cl-tuples))
+  (:use :cl :cl-tuples))
 (in-package :my-package)
 
 ; Custom error function (Need to tested it's validity in SBCL)

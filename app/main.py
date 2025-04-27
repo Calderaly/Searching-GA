@@ -115,8 +115,8 @@ def genetic_algorithm():
         binary_representation_1 = encode_to_binary(best_individual[0])
         binary_representation_2 = encode_to_binary(best_individual[1])
         binary_representation_total = binary_representation_1 + binary_representation_2
-        print(f"Binary representation of first best individual {binary_representation_1}, second best individual 
-            {binary_representation_2}, and total best individual: {binary_representation_total}")
+        print(f"Binary representation of first best individual {binary_representation_1}, " 
+        + f"second best individual {binary_representation_2}, and total best individual: {binary_representation_total}")
         # Print the binary representation of the best value
         best_value_binary = encode_to_binary(best_value)
         print(f"Best value in binary: {best_value_binary}")
