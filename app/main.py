@@ -116,7 +116,7 @@ def genetic_algorithm():
         binary_representation_2 = encode_to_binary(best_individual[1])
         binary_representation_total = binary_representation_1 + binary_representation_2
         print(f"Binary representation of first best individual {binary_representation_1}, " 
-        + f"second best individual {binary_representation_2}, and total best individual: {binary_representation_total}")
+        + f" second best individual {binary_representation_2}, and total best individual: {binary_representation_total}")
         # Print the binary representation of the best value
         best_value_binary = encode_to_binary(best_value)
         print(f"Best value in binary: {best_value_binary}")
@@ -135,8 +135,8 @@ if __name__ == "__main__":
     best_solution_bin_1 = encode_to_binary(best_solution[0])
     best_solution_bin_2 = encode_to_binary(best_solution[1])
     best_solution_bin_total = best_solution_bin_1 + best_solution_bin_2
-    print(f"Binary representation of the best first solution {best_solution_bin_1}, the best second solution {best_solution_bin_2}, 
-        and total best solution  {best_solution_bin_total}")
+    print(f"Binary representation of the best first solution {best_solution_bin_1}, the best second solution {best_solution_bin_2}, " 
+        + f" and total best solution  {best_solution_bin_total}")
     # Print the binary number of the best score
     best_score_binary = encode_to_binary(int(best_score))
     print(f"Binary representation of the best score: {best_score_binary}")
