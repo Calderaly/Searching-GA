@@ -104,7 +104,8 @@
                 collect (let ((cumulative-probability 0)
                               (random-value (random 1.0)))
                           (loop for i from 0 below (length population)
-                                do (incf cumulative-probability (nth i probabilities)) ; Menggunakan incf untuk inkremen                                when (>= cumulative-probability random-value)
+                                do (incf cumulative-probability (nth i probabilities)) ; Menggunakan incf untuk inkremen 
+                                ; when (>= cumulative-probability random-value)
                                   return (nth i population)))))))) ; Mengembalikan orang tua
 
 (defun uniform-crossover (parent1 parent2 crossover-rate)

@@ -34,10 +34,15 @@
 
 ; Function to encode numerical data types into binary
 (defun encode-to-binary (value)
-  (cond
+  (handler-case
+    (cond
     ((integerp value) (format nil "~0,10b" value))
-    ((floatp value) (format nil "~0,10b" (truncate (* (/ (- value *domain-min*) (- *domain-max* *domain-min*)) (1- (expt 2 *bits*))))))
-    (t (simple-error "Unsupported data type for encoding.")))) ; error in general is good, using this to specify the error
+    ((floatp value) (format nil "~0,10b" (truncate (* (/ (- value *domain-min*) (- *domain-max* *domain-min*)) (1- (expt 2 *bits*)))
+      )))
+    (t (simple-error "Unsupported data type for encoding.")))
+    (simple-error (se)
+      format t "Penyebab error: ~A" (:error se)
+    nil))) ; error in general is good, using this to specify the error
 
 ; Objective function to be minimized
 (defun objective (x1 x2)
@@ -72,7 +77,8 @@
 
 ; Selection: Tournament Selection
 (defun tournament-selection (evaluated-pop)
-  (let ((tournament (loop for individual in (loop repeat *tournament-size* collect (nth (random (length evaluated-pop)) evaluated-pop))
+  (let ((tournament (loop for individual in (loop repeat *tournament-size* collect (nth (random (length evaluated-pop)) 
+      evaluated-pop))
                           collect individual)))
     (reduce (lambda (a b) (if (< (second a) (second b)) a b)) tournament)))
 
@@ -82,8 +88,10 @@
       (let* ((parent1-bin (concatenate 'string (encode-to-binary (first parent1)) (encode-to-binary (second parent1))))
              (parent2-bin (concatenate 'string (encode-to-binary (first parent2)) (encode-to-binary (second parent2))))
              (crossover-point (1+ (random (length parent1-bin)))))
-        (multiple-value-bind (child1 child2) (values (decode (concatenate 'string (subseq parent1-bin 0 crossover-point) (subseq parent2-bin crossover-point)))
-                                                      (decode (concatenate 'string (subseq parent2-bin 0 crossover-point) (subseq parent1-bin crossover-point))))
+        (multiple-value-bind (child1 child2) (values (decode (concatenate 'string (subseq parent1-bin 0 crossover-point) 
+            (subseq parent2-bin crossover-point)))
+                                                      (decode (concatenate 'string (subseq parent2-bin 0 crossover-point) 
+                                                        (subseq parent1-bin crossover-point))))
           (values child1 child2)))
       (values parent1 parent2)))
 
@@ -113,15 +121,18 @@
                             (when (< (length new-population) *population-size*)
                               (push child2 new-population)))))
                (setf population (nreverse new-population))
-               (multiple-value-bind (best-individual best-value) (reduce (lambda (a b) (if (< (second a) (second b)) a b)) evaluated-pop)
+               (multiple-value-bind (best-individual best-value) (reduce (lambda (a b) (if (< (second a) (second b)) a b)) 
+                  evaluated-pop)
                  (format t "Generation ~A: Best = ~A with value = ~A~%" generation best-individual best-value)
                  (let* ((binary-representation-1 (encode-to-binary (first best-individual)))
                         (binary-representation-2 (encode-to-binary (second best-individual)))
                         (binary-representation-total (concatenate 'string binary-representation-1 binary-representation-2))
                         (best-value-binary (encode-to-binary (truncate best-value))))
-                   (format t "Binary representation of first best individual ~A, second best individual ~A, and total best individual: ~A~%" binary-representation-1 binary-representation-2 binary-representation-total)
+                   (format t "Binary representation of first best individual ~A, second best individual ~A, 
+                      and total best individual: ~A~%" binary-representation-1 binary-representation-2 binary-representation-total)
                    (format t "Best value in binary: ~A~%" best-value-binary)))))
-    (multiple-value-bind (best-individual best-value) (reduce (lambda (a b) (if (< (second a) (second b)) a b)) (evaluate-population population))
+    (multiple-value-bind (best-individual best-value) (reduce (lambda (a b) (if (< (second a) (second b)) a b)) (evaluate-population 
+      population))
       (values best-individual best-value))))
 
 ; Running the genetic algorithm
@@ -133,12 +144,14 @@
            (best-solution-bin-2 (encode-to-binary (second best-solution)))
            (best-solution-bin-total (concatenate 'string best-solution-bin-1 best-solution-bin-2))
            (best-score-binary (encode-to-binary (truncate best-score))))
-      (format t "Binary representation of the best first solution ~A, the best second solution ~A, and total best solution ~A~%" best-solution-bin-1 best-solution-bin-2 best-solution-bin-total)
+      (format t "Binary representation of the best first solution ~A, the best second solution ~A, and total best solution ~A~%" 
+      best-solution-bin-1 best-solution-bin-2 best-solution-bin-total)
       (format t "Binary representation of the best score: ~A~%" best-score-binary)
       (format t "~%Comparison of binary numbers after crossover and mutation:~%")
       (loop for individual in (create-population)
             do (let* ((binary-representation-1 (encode-to-binary (first individual)))
                       (binary-representation-2 (encode-to-binary (second individual)))
                       (binary-representation-total (concatenate 'string binary-representation-1 binary-representation-2)))
-                 (format t "Individual: ~A, Binary1: ~A, Binary2: ~A, sum: ~A~%" individual binary-representation-1 binary-representation-2 binary-representation-total))))))
+                 (format t "Individual: ~A, Binary1: ~A, Binary2: ~A, sum: ~A~%" individual binary-representation-1 
+                 binary-representation-2 binary-representation-total))))))
 (main)
